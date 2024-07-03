@@ -10,8 +10,6 @@ import crypto from 'crypto';
 const { EMAIL_SERVICE_USER, EMAIL_SERVICE_PASSWORD } = process.env;
 
 
-
-
 export const register = async (req: Request, res: Response) => {
     const userDTO = plainToClass(UserDTO, req.body);
     const errors = await validate(userDTO);
@@ -21,7 +19,12 @@ export const register = async (req: Request, res: Response) => {
     }
     
     const { username, password, email } = userDTO;
-    // console.log(1111, username, password, email)
+    // check if the user already exists
+    const user = await User.findOne({ where: { email } });
+    if (user) {
+        return res.status(409).json({ message: 'User already exists' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     await User.create({ username, password: hashedPassword, email } as User);
     res.status(201).send('User registered');
@@ -35,8 +38,8 @@ export const login = async (req: Request, res: Response) => {
         return res.status(400).json(errors);
     }
 
-    const { username, password } = userDTO;
-    const user = await User.findOne({ where: { username } });
+    const { email, password } = userDTO;
+    const user = await User.findOne({ where: { email } });
     
     if (user && await bcrypt.compare(password, user.password)) {
         const token = jwt.sign({ id: user.id }, 'secret', { expiresIn: '1h' });
@@ -91,6 +94,19 @@ export const forgetPassword = async (req: Request, res: Response) => {
             return res.status(200).json({ message: 'Password reset Email sent'})
         }
       })
+
+}
+
+export const resetPassword = async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+    //check if the user exists
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+        return res.status(404).json({ message: 'User not found'});
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await User.update({ password: hashedPassword }, { where: { email } });
+    res.status(200).json({ message: 'Password reset successful'});
 }
 
 
