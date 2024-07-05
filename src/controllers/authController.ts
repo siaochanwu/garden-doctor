@@ -8,6 +8,9 @@ import User from '../models/userModel';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 const { EMAIL_SERVICE_USER, EMAIL_SERVICE_PASSWORD } = process.env;
+import fs from 'fs';
+import path from 'path';
+import handlebars from 'handlebars';
 
 
 export const register = async (req: Request, res: Response) => {
@@ -78,11 +81,19 @@ export const forgetPassword = async (req: Request, res: Response) => {
         }
       });
 
+      // dynamic html template
+      const templatepPath = path.resolve(__dirname, 'src/views/mail.html');
+      const templateSource = fs.readFileSync('src/views/mail.html', 'utf8');
+      const template = handlebars.compile(templateSource);
+      const htmlTemplate = template({ temporaryPassword, username: user.username});
+    
+
       const mailOptions = {
         from: EMAIL_SERVICE_USER,
         to: user.email,
         subject: 'GreenDoctor App Password Reset',
-        text: `Your temporary password is ${temporaryPassword}, It will expire in 10 minutes. Please change your password after login.`
+        html: htmlTemplate
+        // text: `Your temporary password is ${temporaryPassword}, It will expire in 10 minutes. Please change your password after login.`
       };
 
       transporter.sendMail(mailOptions, (error, info) =>{
@@ -109,4 +120,26 @@ export const resetPassword = async (req: Request, res: Response) => {
     res.status(200).json({ message: 'Password reset successful'});
 }
 
+
+// const createFakeUser = async () => {
+//     try {
+//         console.log(111111111)
+//         const users: User[] = []
+//         for (let i = 1000; i < 3000; i++) {
+//             const hashedPassword = await bcrypt.hash(`user${i}pwd`, 10);
+
+//             users.push({
+//                 username: `user${i}`,
+//                 email: `user${i}@gmail.com`,
+//                 password: hashedPassword
+//             } as User)
+//         }
+//         await User.bulkCreate(users);
+//     } catch (error) {
+//         console.error('Unable to connect to the database:', error);
+//     }
+//     console.log('success')
+    
+// }
+// createFakeUser()
 
