@@ -24,7 +24,7 @@ export const addReply = async (req: RequestUser, res: Response) => {
   const imageRecords = imageFiles.map(file => ({ imageUrl: file.path, replyId: newReply.id }));
   await ReplyImage.bulkCreate(imageRecords as ReplyImage[]);
 
-  res.status(201).send('Reply added');
+  res.status(201).json({ message: 'Reply added'});
 };
 
 export const getReplies = async (req: Request, res: Response) => {
@@ -36,7 +36,7 @@ export const getReplies = async (req: Request, res: Response) => {
     reply.setDataValue('username' as keyof Reply, user?.username);
   }))
   
-  res.json(replies);
+  res.status(201).json(replies);
 };
 
 export const editReply = async (req: RequestUser, res: Response) => {
@@ -44,7 +44,7 @@ export const editReply = async (req: RequestUser, res: Response) => {
   const { text } = req.body;
 
   await Reply.update({ text }, { where: { id, userId: req.user?.id } });
-  res.send('Reply updated');
+  res.status(201).json({ message: 'Reply updated'});
 }
 
 export const deleteReply = async (req: RequestUser, res: Response) => { 
@@ -60,5 +60,5 @@ export const deleteReply = async (req: RequestUser, res: Response) => {
   }
 
   await Reply.destroy({ where: { id, userId: req.user?.id } });
-  res.json({ message: 'Reply deleted'});
+  res.status(201).json({ message: 'Reply deleted'});
 }
