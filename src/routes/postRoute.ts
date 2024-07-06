@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { addPost, getAllPosts, getOnePost, editPost, deletePost } from '../controllers/postController';
+import { addPost, getAllPosts, getOnePost, editPost, deletePost, getSearchPosts } from '../controllers/postController';
 import { authenticate } from '../middleware/authMiddleware';
 
 const post = Router();
@@ -28,6 +28,9 @@ post.get('/posts/:id', getOnePost);
 post.post('/post', authenticate, upload.array('images'), addPost);
 post.put('/posts/:id', authenticate, upload.array('images'), editPost);
 post.delete('/posts/:id', authenticate, deletePost);
+
+// search posts by keyword
+post.post('/posts/search', getSearchPosts);
 
 
 export default post;

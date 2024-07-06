@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Reply from '../models/replyModel';
 import ReplyImage from '../models/replyImageModel';
 import UserModel from '../models/userModel';
+import { Op } from 'sequelize';
 
 interface User {
   id: number
@@ -61,4 +62,21 @@ export const deleteReply = async (req: RequestUser, res: Response) => {
 
   await Reply.destroy({ where: { id, userId: req.user?.id } });
   res.status(201).json({ message: 'Reply deleted'});
+}
+
+export const getSearchReplies = async (req: Request, res: Response) => {
+  const {keyword} = req.body;
+  const replies = await Reply.findAll({
+    where: {
+      [Op.or]: [
+        {
+          text: {
+            [Op.like]: `%${keyword}%`,
+          },
+        },
+      ]
+    },
+    include: [ReplyImage],
+  })
+  res.status(201).json(replies);
 }

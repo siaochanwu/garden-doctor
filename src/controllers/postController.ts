@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Post from '../models/postModel';
 import PostImage from '../models/postImageModel';
+import { Op } from 'sequelize';
 
 interface User {
   id: number
@@ -93,4 +94,34 @@ export const deletePost = async (req: RequestUser, res: Response) => {
 
   await Post.destroy({ where: { id: postId, userId: req.user?.id } });
   res.status(200).json({ message: 'Post deleted' });
+}
+
+export const getSearchPosts = async (req: Request, res: Response) => {
+  const { keyword } = req.body;
+  console.log(111, keyword)
+  
+  // using %like to search 
+  const posts = await Post.findAll({
+    where: {
+      [Op.or]: [
+        {
+          question: {
+            [Op.like]: `%${keyword}%`,
+          },
+        },
+        {
+          plantType: {
+            [Op.like]: `%${keyword}%`,
+          },
+        },
+        {
+          environment: {
+            [Op.like]: `%${keyword}%`,
+          },
+        },
+      ],
+    },
+    include: [PostImage],
+  });
+  res.json(posts);
 }
