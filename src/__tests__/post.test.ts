@@ -91,7 +91,7 @@ describe('Post Endpoints', () => {
 
     it('should not get one post with wrong id', async () => {
         const res = await (request(app) as any)
-            .get(`/posts/posts/1`);
+            .get(`/posts/posts/99999`);
         expect(res.statusCode).toEqual(404);
         expect(res.body).toHaveProperty('message');
     });
@@ -119,7 +119,7 @@ describe('Post Endpoints', () => {
 
     it('should not edit a post with wrong id', async () => {
         const res = await (request(app) as any)
-            .put('/posts/posts/2')
+            .put('/posts/posts/9999')
             .set('Authorization', `Bearer ${token}`)
             .field('question', 'What is wrong with my plant?')
             .field('plantType', 'Rose')
@@ -164,7 +164,7 @@ describe('Post Endpoints', () => {
 
     it('should not delete a post with wrong id', async () => {
         const res = await (request(app) as any)
-            .delete('/posts/posts/2')
+            .delete('/posts/posts/9999')
             .set('Authorization', `Bearer ${token}`);
         expect(res.statusCode).toEqual(404);
         expect(res.body).toHaveProperty('message');

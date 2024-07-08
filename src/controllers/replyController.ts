@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Reply from '../models/replyModel';
 import ReplyImage from '../models/replyImageModel';
 import UserModel from '../models/userModel';
+import Post from '../models/postModel';
 import { Op } from 'sequelize';
 
 interface User {
@@ -15,17 +16,30 @@ interface RequestUser extends Request {
 export const addReply = async (req: RequestUser, res: Response) => {
   const { postId, text } = req.body;
 
-  const newReply = await Reply.create({
-    postId,
-    userId: req.user?.id,
-    text
-  } as Reply);
+  // if post does not exist
+  const post = await Post.findByPk(postId);
 
-  const imageFiles = req.files as Express.Multer.File[];
-  const imageRecords = imageFiles.map(file => ({ imageUrl: file.path, replyId: newReply.id }));
-  await ReplyImage.bulkCreate(imageRecords as ReplyImage[]);
+  if (!post) {
+    return res.status(404).json({ message: 'Post not found' });
+  } 
 
-  res.status(201).json({ message: 'Reply added'});
+  try {
+    const newReply = await Reply.create({
+      postId,
+      userId: req.user?.id,
+      text
+    } as Reply);
+  
+    const imageFiles = req.files as Express.Multer.File[];
+    const imageRecords = imageFiles.map(file => ({ imageUrl: file.path, replyId: newReply.id }));
+    await ReplyImage.bulkCreate(imageRecords as ReplyImage[]);
+  
+    res.status(201).json({ message: 'Reply added'});
+  } catch (err) {
+    console.error(err);
+    // create reply failed
+    res.status(500).json({ message: 'Sql error' });
+  }
 };
 
 export const getReplies = async (req: Request, res: Response) => {
@@ -51,8 +65,14 @@ export const editReply = async (req: RequestUser, res: Response) => {
   const { id } = req.params;
   const { text } = req.body;
 
-  await Reply.update({ text }, { where: { id, userId: req.user?.id } });
-  res.status(201).json({ message: 'Reply updated'});
+  try {
+    await Reply.update({ text }, { where: { id, userId: req.user?.id } });
+    res.status(201).json({ message: 'Reply updated'});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Sql error' });
+  }
+
 }
 
 export const deleteReply = async (req: RequestUser, res: Response) => { 
@@ -68,8 +88,8 @@ export const deleteReply = async (req: RequestUser, res: Response) => {
   }
 
   await Reply.destroy({ where: { id, userId: req.user?.id } });
-  res.status(201).json({ message: 'Reply deleted'});
-}
+  res.status(200).json({ message: 'Reply deleted'});
+} 
 
 export const getSearchReplies = async (req: Request, res: Response) => {
   const {keyword} = req.body;

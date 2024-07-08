@@ -73,13 +73,13 @@ describe('Reply Endpoints', () => {
         const res = await (request(app) as any)
             .post('/replies/reply')
             .set('Authorization', `Bearer ${token}`)
-            .field('text', 'Your plant needs more sunlight')
+            .field('text', 'Your plant needs more sunlight!!')
             .field('postId', postId)
 
         expect(res.statusCode).toEqual(201);
         expect(res.body).toHaveProperty('message');
 
-        const reply = await Reply.findOne({ where: { text: 'Your plant needs more sunlight' } });
+        const reply = await Reply.findOne({ where: { text: 'Your plant needs more sunlight!!' } });
         newReplyId = reply?.id;
     });
 
@@ -106,7 +106,7 @@ describe('Reply Endpoints', () => {
             .delete(`/replies/reply/${newReplyId}`)
             .set('Authorization', `Bearer ${token}`)
 
-        expect(res.statusCode).toEqual(201);
+        expect(res.statusCode).toEqual(200);
         expect(res.body).toHaveProperty('message');
     });
 
