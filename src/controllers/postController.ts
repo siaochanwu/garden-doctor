@@ -2,7 +2,9 @@ import { Request, Response } from 'express';
 import Post from '../models/postModel';
 import PostImage from '../models/postImageModel';
 import { Op } from 'sequelize';
+import NodeCache from 'node-cache';
 
+const myCache = new NodeCache();
 interface User {
   id: number
 };
@@ -13,7 +15,7 @@ interface RequestUser extends Request {
 
 export const addPost = async (req: RequestUser, res: Response) => {
   const { question, plantType, environment } = req.body;
-  console.log(333, question, plantType, environment)
+  // console.log(333, question, plantType, environment)
 
   const newPost = await Post.create({
     userId: req.user?.id,
@@ -24,22 +26,44 @@ export const addPost = async (req: RequestUser, res: Response) => {
 
   const imageFiles = req.files as Express.Multer.File[];
   const imageRecords = imageFiles.map(file => ({ imageUrl: file.path, postId: newPost.id }));
-  console.log(444, imageRecords)
+  // console.log(444, imageRecords)
   await PostImage.bulkCreate(imageRecords as unknown as PostImage[]);
   res.status(201).json({ message: 'Post created'});
 };
 
 export const getAllPosts = async (req: Request, res: Response) => {
-  const posts = await Post.findAll({include: [PostImage]});
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const limit = req.query.limit ? Number(req.query.limit) : 10;
+
+  const posts = await Post.findAll({
+    offset: (page - 1) * limit,
+    limit,
+    include: [PostImage]
+  });
   res.json(posts);
 };
 
 export const getOnePost = async (req: Request, res: Response) => {
-  const post = await Post.findByPk(req.params.id, {include: [PostImage]});
-  if (!post) {
-    return res.status(404).json({ message: 'Post not found'});
+  
+  if (myCache.has(req.params.id)) {
+      console.log('cache hit!!!!!!')
+      return res.json(myCache.get(req.params.id));
   }
-  res.json(post);
+  
+  try {
+    const post = await Post.findByPk(req.params.id, {include: [PostImage]});
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Cache post using the post's ID as the key
+    myCache.set(req.params.id, post.toJSON(), 10000);
+    
+    return res.json(post);
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    return res.status(500).json({ message: "Error fetching post" });
+  }
 };
 
 export const editPost = async (req: RequestUser, res: Response) => {
@@ -99,7 +123,7 @@ export const deletePost = async (req: RequestUser, res: Response) => {
 export const getSearchPosts = async (req: Request, res: Response) => {
   const { keyword } = req.body;
   console.log(111, keyword)
-  
+
   // using %like to search 
   const posts = await Post.findAll({
     where: {

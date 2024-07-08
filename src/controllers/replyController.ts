@@ -30,7 +30,14 @@ export const addReply = async (req: RequestUser, res: Response) => {
 
 export const getReplies = async (req: Request, res: Response) => {
   const { postId } = req.params;
-  const replies = await Reply.findAll({ where: { postId }, include: [ReplyImage]});
+  const page = req.query.page ? Number(req.query.page) : 1;
+  const limit = req.query.limit ? Number(req.query.limit) : 10;
+
+  const replies = await Reply.findAll({ 
+    where: { postId },
+    offset: (page - 1) * limit,
+    limit,
+    include: [ReplyImage]});
   //get username
   const repliesWithUsername = await Promise.all(replies.map(async (reply) => {
     const user = await UserModel.findByPk(reply.userId);

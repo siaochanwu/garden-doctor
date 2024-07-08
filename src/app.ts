@@ -6,6 +6,7 @@ import post from './routes/postRoute';
 import reply from './routes/replyRoute';
 import sequelize from './config/db';
 
+
 const app: Application = express();
 
 
