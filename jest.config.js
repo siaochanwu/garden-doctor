@@ -4,10 +4,8 @@ const config = {
     testEnvironment: 'node',
     testPathIgnorePatterns: ['/node_modules/', '/dist/'],
     setupFiles: ['./jest.setup.js'],
-    globals: {
-        'ts-jest': {
-            tsconfig: 'tsconfig.json'
-        }
+    transform: {
+        '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
     }
 }
 
