@@ -14,7 +14,7 @@ const sequelize = new Sequelize({
     username: isTestEnv ? TEST_DB_USER : DB_USER,
     password: isTestEnv ? TEST_DB_PASSWORD : DB_PASSWORD,
     host: isTestEnv ? TEST_DB_HOST : DB_HOST,
-    port: 3307,
+    port: isTestEnv ? 3306 : 3307,
     models: [User, Post, Reply, PostImage, ReplyImage]
 });
 
