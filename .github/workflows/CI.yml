@@ -15,7 +15,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: gardendoctor_test
         ports:
-          - 3306:3306
+          - 3306:3307
         options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
@@ -33,7 +33,7 @@ jobs:
     - name: Setup database
       run: |
         sudo apt-get install -y mysql-client
-        mysql -h 127.0.0.1 -P 3306 -u root -proot -e "CREATE DATABASE IF NOT EXISTS gardendoctor_test;"
+        mysql -h 127.0.0.1 -P 3306:3307 -u root -proot -e "CREATE DATABASE IF NOT EXISTS gardendoctor_test;"
 
     - name: Run tests
       run: npm test
