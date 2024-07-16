@@ -87,7 +87,7 @@ describe('Reply Endpoints', () => {
         const res = await (request(app) as any)
             .get(`/replies/replies/${postId}`);
 
-        expect(res.statusCode).toEqual(201);
+        expect(res.statusCode).toEqual(200);
         expect(res.body).toHaveLength(1);
     });
 
