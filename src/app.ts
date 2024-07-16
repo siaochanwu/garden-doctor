@@ -5,6 +5,7 @@ import user from './routes/userRoute';
 import post from './routes/postRoute';
 import reply from './routes/replyRoute';
 import sequelize from './config/db';
+import setupSwagger from './swaggerConfig';
 
 
 const app: Application = express();
@@ -13,6 +14,7 @@ const app: Application = express();
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+setupSwagger(app);
 
 app.use('/uploads', express.static('uploads'));
 app.use('/users', user);
