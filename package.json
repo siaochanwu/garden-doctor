@@ -5,7 +5,8 @@
   "scripts": {
     "start": "nodemon src/app.ts",
     "build": "tsc --project ./",
-    "test": "NODE_ENV=test jest"
+    "test": "NODE_ENV=test jest",
+    "api": "npx swagger-typescript-api -p ./src/swagger.json -o ./src/api --axios --modular --single-http-client"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -44,6 +45,7 @@
     "nodemon": "^3.1.4",
     "supertest": "^7.0.0",
     "swagger-jsdoc": "^6.2.8",
+    "swagger-typescript-api": "^13.0.13",
     "swagger-ui-express": "^5.0.1",
     "ts-jest": "^29.1.5",
     "ts-node": "^10.9.2",
