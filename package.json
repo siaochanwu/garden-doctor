@@ -8,6 +8,10 @@
     "test": "NODE_ENV=test jest",
     "api": "npx swagger-typescript-api -p ./src/swagger.json -o ./src/api --axios --modular --single-http-client"
   },
+  "keywords": [],
+  "author": "siaochanwu",
+  "license": "ISC",
+  "description": "",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
